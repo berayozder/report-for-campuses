@@ -1,0 +1,17 @@
+{
+  "name": "hazard-reporter-yga",
+  "version": "1.0.0",
+  "description": "Tehlike İhbar Uygulaması - Hazard Reporting Web App for Students",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "firebase": "^12.11.0"
+  }
+}
