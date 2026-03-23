@@ -927,9 +927,14 @@ subscribe(() => { render(); });
 onAuthChange(async (user) => {
   currentAuthUser = user;
   if (user) {
-    currentUserRole = await getUserRole(user.uid);
-    // Ensure user doc exists in Firestore
-    try { await setUserRole(user.uid, currentUserRole, user.displayName); } catch {}
+    try {
+      currentUserRole = await getUserRole(user.uid);
+      // Ensure user doc exists in Firestore
+      await setUserRole(user.uid, currentUserRole, user.displayName); 
+    } catch (err) {
+      console.warn("Role assignment error:", err);
+      currentUserRole = UserRoles.USER;
+    }
   } else {
     currentUserRole = UserRoles.USER;
   }
