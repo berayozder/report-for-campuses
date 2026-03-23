@@ -2,11 +2,14 @@
 
 > **Kampüs Tehlike İhbar Sistemi** — A web application that lets students quickly report hazards they spot on campus (broken outlets, cracked glass, slippery floors, etc.) by snapping a photo and sharing their location.
 
+### 🌐 [Live Demo → app-yga.vercel.app](https://app-yga.vercel.app)
+
 | Home Screen | Report Form |
 |:-----------:|:-----------:|
 | ![Home](screenshots/home.png) | ![Create Report](screenshots/create-report.png) |
 
 ---
+
 
 ## ⚡ Quick Start
 
@@ -18,13 +21,17 @@ cd report-for-campuses
 # 2. Install dependencies
 npm install
 
-# 3. Start the development server
+# 3. (Optional) Set up Firebase — copy and fill in your Firebase config
+cp .env.example .env
+# Edit .env with your Firebase project values
+
+# 4. Start the development server
 npm run dev
 ```
 
 Open **http://localhost:5173/** in your browser. That's it! 🎉
 
-> **Note:** The app works immediately with **localStorage** — no Firebase configuration needed for testing. All data is saved in your browser.
+> **Note:** The app works immediately **without** setting up Firebase — it uses localStorage as a fallback. To enable cloud features (real-time sync, Google sign-in, photo storage), set up the `.env` file with your Firebase project config.
 
 ---
 
