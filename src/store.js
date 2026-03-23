@@ -14,6 +14,9 @@ import {
   orderBy,
   onSnapshot,
   serverTimestamp,
+  increment,
+  arrayUnion,
+  arrayRemove,
 } from 'firebase/firestore';
 import {
   ref,
@@ -102,6 +105,29 @@ export function getStatusCounts() {
   };
 }
 
+/**
+ * Get a unique visitor ID for anonymous upvoting.
+ * Stored in localStorage so it persists across sessions.
+ */
+export function getVisitorId() {
+  let id = localStorage.getItem('yga_visitor_id');
+  if (!id) {
+    id = 'v_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('yga_visitor_id', id);
+  }
+  return id;
+}
+
+/**
+ * Check if a visitor has already upvoted a report.
+ */
+export function hasUpvoted(reportId) {
+  const report = getReportById(reportId);
+  if (!report) return false;
+  const visitorId = getVisitorId();
+  return (report.upvoterIds || []).includes(visitorId);
+}
+
 // ════════════════════════════════════════════════
 // FIREBASE MODE
 // ════════════════════════════════════════════════
@@ -129,6 +155,8 @@ if (useFirebase) {
         status: data.status || ReportStatus.OPEN,
         userId: data.userId || null,
         userName: data.userName || null,
+        upvotes: data.upvotes || 0,
+        upvoterIds: data.upvoterIds || [],
       };
     });
     notifyListeners();
@@ -190,6 +218,8 @@ export async function createReport({ imageDataUrl, description, latitude, longit
       status: ReportStatus.OPEN,
       userId: userId || null,
       userName: userName || null,
+      upvotes: 0,
+      upvoterIds: [],
       createdAt: serverTimestamp(),
     });
     // No need to manually update _reports — onSnapshot handles it
@@ -208,11 +238,65 @@ export async function createReport({ imageDataUrl, description, latitude, longit
       status: ReportStatus.OPEN,
       userId: userId || null,
       userName: userName || null,
+      upvotes: 0,
+      upvoterIds: [],
     };
     _reports.push(report);
     saveToLocalStorage();
     notifyListeners();
     return report;
+  }
+}
+
+/**
+ * Upvote a report. Prevents double-voting via visitor ID.
+ */
+export async function upvoteReport(id) {
+  const visitorId = getVisitorId();
+
+  if (useFirebase) {
+    const docRef = doc(db, 'reports', id);
+    await updateDoc(docRef, {
+      upvotes: increment(1),
+      upvoterIds: arrayUnion(visitorId),
+    });
+    // onSnapshot handles the update
+  } else {
+    const report = _reports.find((r) => r.id === id);
+    if (report) {
+      if (!report.upvoterIds) report.upvoterIds = [];
+      if (report.upvoterIds.includes(visitorId)) return; // already voted
+      report.upvotes = (report.upvotes || 0) + 1;
+      report.upvoterIds.push(visitorId);
+      saveToLocalStorage();
+      notifyListeners();
+    }
+  }
+}
+
+/**
+ * Remove upvote from a report.
+ */
+export async function removeUpvote(id) {
+  const visitorId = getVisitorId();
+
+  if (useFirebase) {
+    const docRef = doc(db, 'reports', id);
+    await updateDoc(docRef, {
+      upvotes: increment(-1),
+      upvoterIds: arrayRemove(visitorId),
+    });
+  } else {
+    const report = _reports.find((r) => r.id === id);
+    if (report && report.upvoterIds) {
+      const idx = report.upvoterIds.indexOf(visitorId);
+      if (idx > -1) {
+        report.upvoterIds.splice(idx, 1);
+        report.upvotes = Math.max(0, (report.upvotes || 0) - 1);
+        saveToLocalStorage();
+        notifyListeners();
+      }
+    }
   }
 }
 

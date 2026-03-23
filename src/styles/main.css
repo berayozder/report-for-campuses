@@ -1101,6 +1101,414 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* --- Upvote Button --- */
+.upvote-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.upvote-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.upvote-btn--active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.upvote-btn--active:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  color: white;
+}
+
+.upvote-btn .material-icons-round {
+  font-size: 15px;
+}
+
+.upvote-btn--animate {
+  animation: upvotePop 0.3s ease;
+}
+
+@keyframes upvotePop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.report-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-light);
+}
+
+/* --- Hall of Fame --- */
+.fame-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+  margin: 0 16px 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.fame-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--success), #66BB6A);
+}
+
+.fame-card__image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+}
+
+.fame-card__body {
+  padding: 14px;
+}
+
+.fame-card__desc {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.fame-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.fame-card__resolved-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--success-bg);
+  color: var(--success);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.fame-card__resolved-badge .material-icons-round {
+  font-size: 14px;
+}
+
+.fame-card__stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.fame-card__stat {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.fame-card__stat .material-icons-round {
+  font-size: 14px;
+}
+
+/* --- Leaderboard --- */
+.leaderboard-header {
+  text-align: center;
+  padding: 20px 16px 8px;
+}
+
+.leaderboard-header__icon {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFF8E1, #FFE082);
+}
+
+.leaderboard-header__icon .material-icons-round {
+  font-size: 32px;
+  color: #F9A825;
+}
+
+.leaderboard-header__title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.leaderboard-header__subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin: 0 16px 6px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  transition: transform var(--transition);
+}
+
+.leaderboard-row:first-of-type {
+  border-color: rgba(249, 168, 37, 0.3);
+  background: linear-gradient(135deg, #FFFDE7, #FFF8E1);
+}
+
+.leaderboard-row__rank {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.leaderboard-row__rank--1 {
+  background: linear-gradient(135deg, #FFD54F, #FFC107);
+  color: #5D4037;
+}
+
+.leaderboard-row__rank--2 {
+  background: linear-gradient(135deg, #E0E0E0, #BDBDBD);
+  color: #424242;
+}
+
+.leaderboard-row__rank--3 {
+  background: linear-gradient(135deg, #FFCC80, #FFB74D);
+  color: #5D4037;
+}
+
+.leaderboard-row__rank--default {
+  background: var(--bg);
+  color: var(--text-muted);
+}
+
+.leaderboard-row__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.leaderboard-row__name {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.leaderboard-row__badges {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.leaderboard-row__points {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.leaderboard-row__points-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  display: block;
+  text-align: right;
+}
+
+/* --- Badge Pill --- */
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-pill--earned {
+  background: linear-gradient(135deg, #FFF8E1, #FFE082);
+  color: #F57F17;
+}
+
+.badge-pill--locked {
+  background: var(--bg);
+  color: var(--text-muted);
+}
+
+.badge-pill .material-icons-round {
+  font-size: 12px;
+}
+
+/* --- Points Hero Card --- */
+.points-hero {
+  margin: 12px 16px;
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--primary), #4285F4);
+  color: white;
+  text-align: center;
+}
+
+.points-hero__number {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.points-hero__label {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.85;
+  margin-bottom: 12px;
+}
+
+.points-hero__badges {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.points-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: rgba(255,255,255,0.2);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.points-hero__badge .material-icons-round {
+  font-size: 14px;
+}
+
+/* --- Point Rules Info --- */
+.point-rules {
+  margin: 8px 16px 16px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+}
+
+.point-rules__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.point-rules__title .material-icons-round {
+  font-size: 16px;
+  color: var(--primary);
+}
+
+.point-rules__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.point-rules__value {
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* --- Nav Tabs Bar (bottom of header) --- */
+.nav-bar {
+  display: flex;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border-light);
+  padding: 0;
+}
+
+.nav-bar__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition);
+  border-bottom: 2px solid transparent;
+}
+
+.nav-bar__item:hover {
+  color: var(--text-secondary);
+}
+
+.nav-bar__item--active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+
+.nav-bar__item .material-icons-round {
+  font-size: 20px;
+}
+
 /* --- Media Queries (tablet+ centering) --- */
 @media (min-width: 520px) {
   #app {
