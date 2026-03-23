@@ -17,6 +17,9 @@ import {
   increment,
   arrayUnion,
   arrayRemove,
+  getDocs,
+  setDoc,
+  getDoc,
 } from 'firebase/firestore';
 import {
   ref,
@@ -33,7 +36,7 @@ export const ReportStatus = {
 
 export const ALL_STATUSES = [ReportStatus.OPEN, ReportStatus.UNDER_REVIEW, ReportStatus.RESOLVED];
 
-/** Campus hazard categories */
+/** Campus hazard categories — includes accessibility */
 export const HAZARD_CATEGORIES = [
   { id: 'elektrik', label: 'Bozuk Priz / Elektrik', icon: 'electrical_services' },
   { id: 'cam', label: 'Kırık Cam', icon: 'broken_image' },
@@ -42,22 +45,29 @@ export const HAZARD_CATEGORIES = [
   { id: 'yapi', label: 'Yapısal Hasar', icon: 'domain_disabled' },
   { id: 'yangin', label: 'Yangın Riski', icon: 'local_fire_department' },
   { id: 'su', label: 'Su Sızıntısı', icon: 'water_damage' },
+  { id: 'erisilebilirlik', label: 'Erişilebilirlik Engeli', icon: 'accessible' },
   { id: 'diger', label: 'Diğer', icon: 'report_problem' },
 ];
+
+/** User roles */
+export const UserRoles = {
+  USER: 'user',
+  REPAIRMAN: 'repairman',
+  ADMIN: 'admin',
+};
 
 // ─── Firebase or LocalStorage detection ───
 const LOCAL_STORAGE_KEY = 'yga_hazard_reports';
 
 function isFirebaseConfigured() {
   try {
-    // Check if the config has real values (not placeholder)
     return db && db.app && db.app.options.apiKey && !db.app.options.apiKey.startsWith('YOUR_');
   } catch {
     return false;
   }
 }
 
-const useFirebase = isFirebaseConfigured();
+export const useFirebase = isFirebaseConfigured();
 
 // ─── In-memory cache of reports (synced by Firestore listener or localStorage) ───
 let _reports = [];
@@ -65,8 +75,6 @@ const listeners = new Set();
 
 /**
  * Subscribe to report changes.
- * @param {Function} callback
- * @returns {Function} unsubscribe
  */
 export function subscribe(callback) {
   listeners.add(callback);
@@ -105,9 +113,13 @@ export function getStatusCounts() {
   };
 }
 
+/** Get reports assigned to a specific user. */
+export function getAssignedReports(userId) {
+  return getReports().filter((r) => r.assignedTo === userId);
+}
+
 /**
  * Get a unique visitor ID for anonymous upvoting.
- * Stored in localStorage so it persists across sessions.
  */
 export function getVisitorId() {
   let id = localStorage.getItem('yga_visitor_id');
@@ -128,6 +140,42 @@ export function hasUpvoted(reportId) {
   return (report.upvoterIds || []).includes(visitorId);
 }
 
+// ─── Haversine Distance (Smart Duplicate Detection) ───
+
+/**
+ * Calculate distance between two GPS points in meters.
+ */
+function haversineDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371000; // Earth radius in meters
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+/**
+ * Get reports within a radius of given coordinates.
+ * @param {number} lat
+ * @param {number} lng
+ * @param {number} radiusMeters - default 500m
+ * @returns {Array} reports with distance, sorted by proximity
+ */
+export function getNearbyReports(lat, lng, radiusMeters = 500) {
+  if (!lat || !lng) return [];
+  return _reports
+    .filter((r) => r.latitude && r.longitude && r.status !== ReportStatus.RESOLVED)
+    .map((r) => ({
+      ...r,
+      distance: Math.round(haversineDistance(lat, lng, r.latitude, r.longitude)),
+    }))
+    .filter((r) => r.distance <= radiusMeters)
+    .sort((a, b) => a.distance - b.distance);
+}
+
 // ════════════════════════════════════════════════
 // FIREBASE MODE
 // ════════════════════════════════════════════════
@@ -135,7 +183,6 @@ export function hasUpvoted(reportId) {
 if (useFirebase) {
   console.log('🔥 Firebase mode active — using Firestore + Storage');
 
-  // Real-time listener for all reports
   const reportsRef = collection(db, 'reports');
   const q = query(reportsRef, orderBy('createdAt', 'desc'));
 
@@ -145,7 +192,7 @@ if (useFirebase) {
       return {
         id: docSnap.id,
         imageUrl: data.imageUrl || null,
-        imageDataUrl: data.imageUrl || null, // alias for compatibility
+        imageDataUrl: data.imageUrl || null,
         description: data.description || '',
         category: data.category || null,
         latitude: data.latitude || 0,
@@ -157,6 +204,8 @@ if (useFirebase) {
         userName: data.userName || null,
         upvotes: data.upvotes || 0,
         upvoterIds: data.upvoterIds || [],
+        assignedTo: data.assignedTo || null,
+        assignedToName: data.assignedToName || null,
       };
     });
     notifyListeners();
@@ -165,11 +214,6 @@ if (useFirebase) {
   });
 }
 
-/**
- * Upload an image file to Firebase Storage.
- * @param {File} file
- * @returns {Promise<string>} download URL
- */
 async function uploadImageToStorage(file) {
   const filename = `reports/${Date.now()}_${file.name}`;
   const storageRef = ref(storage, filename);
@@ -177,37 +221,26 @@ async function uploadImageToStorage(file) {
   return getDownloadURL(storageRef);
 }
 
-/**
- * Convert a data URL (base64) to a File/Blob for upload.
- * @param {string} dataUrl
- * @returns {File}
- */
 function dataUrlToFile(dataUrl) {
   const arr = dataUrl.split(',');
   const mime = arr[0].match(/:(.*?);/)[1];
   const bstr = atob(arr[1]);
   let n = bstr.length;
   const u8arr = new Uint8Array(n);
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
-  }
+  while (n--) { u8arr[n] = bstr.charCodeAt(n); }
   return new File([u8arr], `photo_${Date.now()}.jpg`, { type: mime });
 }
 
 /**
  * Create a new report.
- * Works with both Firebase and localStorage mode.
  */
 export async function createReport({ imageDataUrl, description, latitude, longitude, address, category, userId, userName }) {
   if (useFirebase) {
-    // Upload image to Storage
     let imageUrl = null;
     if (imageDataUrl) {
       const file = dataUrlToFile(imageDataUrl);
       imageUrl = await uploadImageToStorage(file);
     }
-
-    // Save to Firestore
     await addDoc(collection(db, 'reports'), {
       imageUrl,
       description,
@@ -220,11 +253,11 @@ export async function createReport({ imageDataUrl, description, latitude, longit
       userName: userName || null,
       upvotes: 0,
       upvoterIds: [],
+      assignedTo: null,
+      assignedToName: null,
       createdAt: serverTimestamp(),
     });
-    // No need to manually update _reports — onSnapshot handles it
   } else {
-    // localStorage fallback
     await new Promise((r) => setTimeout(r, 500));
     const report = {
       id: Date.now().toString(36) + Math.random().toString(36).substr(2, 9),
@@ -240,6 +273,8 @@ export async function createReport({ imageDataUrl, description, latitude, longit
       userName: userName || null,
       upvotes: 0,
       upvoterIds: [],
+      assignedTo: null,
+      assignedToName: null,
     };
     _reports.push(report);
     saveToLocalStorage();
@@ -249,23 +284,21 @@ export async function createReport({ imageDataUrl, description, latitude, longit
 }
 
 /**
- * Upvote a report. Prevents double-voting via visitor ID.
+ * Upvote a report.
  */
 export async function upvoteReport(id) {
   const visitorId = getVisitorId();
-
   if (useFirebase) {
     const docRef = doc(db, 'reports', id);
     await updateDoc(docRef, {
       upvotes: increment(1),
       upvoterIds: arrayUnion(visitorId),
     });
-    // onSnapshot handles the update
   } else {
     const report = _reports.find((r) => r.id === id);
     if (report) {
       if (!report.upvoterIds) report.upvoterIds = [];
-      if (report.upvoterIds.includes(visitorId)) return; // already voted
+      if (report.upvoterIds.includes(visitorId)) return;
       report.upvotes = (report.upvotes || 0) + 1;
       report.upvoterIds.push(visitorId);
       saveToLocalStorage();
@@ -275,11 +308,10 @@ export async function upvoteReport(id) {
 }
 
 /**
- * Remove upvote from a report.
+ * Remove upvote.
  */
 export async function removeUpvote(id) {
   const visitorId = getVisitorId();
-
   if (useFirebase) {
     const docRef = doc(db, 'reports', id);
     await updateDoc(docRef, {
@@ -319,6 +351,27 @@ export async function updateReportStatus(id, newStatus) {
 }
 
 /**
+ * Assign a report to a repairman.
+ */
+export async function assignReport(reportId, repairmanId, repairmanName) {
+  if (useFirebase) {
+    const docRef = doc(db, 'reports', reportId);
+    await updateDoc(docRef, {
+      assignedTo: repairmanId,
+      assignedToName: repairmanName || null,
+    });
+  } else {
+    const report = _reports.find((r) => r.id === reportId);
+    if (report) {
+      report.assignedTo = repairmanId;
+      report.assignedToName = repairmanName || null;
+      saveToLocalStorage();
+      notifyListeners();
+    }
+  }
+}
+
+/**
  * Delete a report.
  */
 export async function deleteReport(id) {
@@ -331,6 +384,115 @@ export async function deleteReport(id) {
     saveToLocalStorage();
     notifyListeners();
   }
+}
+
+// ════════════════════════════════════════════════
+// USER ROLES (Firestore)
+// ════════════════════════════════════════════════
+
+const _usersCache = new Map();
+
+/**
+ * Get user role from Firestore.
+ */
+export async function getUserRole(uid) {
+  if (!uid) return UserRoles.USER;
+  if (_usersCache.has(uid)) return _usersCache.get(uid);
+
+  if (useFirebase) {
+    try {
+      const userDoc = await getDoc(doc(db, 'users', uid));
+      const role = userDoc.exists() ? (userDoc.data().role || UserRoles.USER) : UserRoles.USER;
+      _usersCache.set(uid, role);
+      return role;
+    } catch {
+      return UserRoles.USER;
+    }
+  }
+
+  // localStorage fallback
+  const roles = JSON.parse(localStorage.getItem('yga_user_roles') || '{}');
+  return roles[uid] || UserRoles.USER;
+}
+
+/**
+ * Set user role (admin only).
+ */
+export async function setUserRole(uid, role, displayName) {
+  if (useFirebase) {
+    await setDoc(doc(db, 'users', uid), {
+      role,
+      displayName: displayName || null,
+      updatedAt: serverTimestamp(),
+    }, { merge: true });
+    _usersCache.set(uid, role);
+  } else {
+    const roles = JSON.parse(localStorage.getItem('yga_user_roles') || '{}');
+    roles[uid] = role;
+    localStorage.setItem('yga_user_roles', JSON.stringify(roles));
+    _usersCache.set(uid, role);
+  }
+}
+
+/**
+ * Get all users with roles (for admin panel).
+ */
+export async function getAllUsers() {
+  if (useFirebase) {
+    try {
+      const snapshot = await getDocs(collection(db, 'users'));
+      return snapshot.docs.map((d) => ({ uid: d.id, ...d.data() }));
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+/**
+ * Get all repairmen (for assignment dropdown).
+ */
+export async function getRepairmen() {
+  const users = await getAllUsers();
+  return users.filter((u) => u.role === UserRoles.REPAIRMAN || u.role === UserRoles.ADMIN);
+}
+
+// ════════════════════════════════════════════════
+// IN-APP NOTIFICATIONS
+// ════════════════════════════════════════════════
+
+const NOTIF_KEY = 'yga_notifications';
+
+export function getNotifications() {
+  try {
+    return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+export function addNotification(message, type = 'info') {
+  const notifs = getNotifications();
+  notifs.unshift({
+    id: Date.now().toString(36),
+    message,
+    type,
+    timestamp: new Date().toISOString(),
+    read: false,
+  });
+  // Keep max 20
+  if (notifs.length > 20) notifs.length = 20;
+  localStorage.setItem(NOTIF_KEY, JSON.stringify(notifs));
+}
+
+export function markAllNotificationsRead() {
+  const notifs = getNotifications();
+  notifs.forEach((n) => { n.read = true; });
+  localStorage.setItem(NOTIF_KEY, JSON.stringify(notifs));
+}
+
+export function getUnreadCount() {
+  return getNotifications().filter((n) => !n.read).length;
 }
 
 // ════════════════════════════════════════════════

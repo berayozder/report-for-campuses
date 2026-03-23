@@ -1509,10 +1509,240 @@ body {
   font-size: 20px;
 }
 
+/* --- Nearby Reports Panel (Smart Duplicate Detection) --- */
+.nearby-panel {
+  margin: 8px 0 16px;
+  border: 1.5px solid var(--primary-light);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, #E8F0FE, #F0F4FF);
+  overflow: hidden;
+}
+
+.nearby-panel__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+}
+
+.nearby-panel__header .material-icons-round {
+  font-size: 22px;
+  color: var(--primary);
+  margin-top: 2px;
+}
+
+.nearby-panel__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.nearby-panel__subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.nearby-panel__list {
+  border-top: 1px solid rgba(26, 115, 232, 0.15);
+}
+
+.nearby-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.nearby-item:hover {
+  background: rgba(26, 115, 232, 0.06);
+}
+
+.nearby-item + .nearby-item {
+  border-top: 1px solid rgba(26, 115, 232, 0.08);
+}
+
+.nearby-item__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.nearby-item__desc {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nearby-item__meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.upvote-btn--small {
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+/* --- Language Toggle --- */
+.lang-toggle {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  padding: 4px 8px !important;
+  border-radius: var(--radius-full) !important;
+  background: var(--primary-light) !important;
+  color: var(--primary) !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+/* --- Notification Bell --- */
+.notif-btn {
+  position: relative;
+}
+
+.notif-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: var(--error);
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.notif-dropdown {
+  position: fixed;
+  top: 52px;
+  right: 8px;
+  width: 300px;
+  max-height: 400px;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  z-index: 1100;
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+}
+
+.notif-dropdown__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.notif-dropdown__mark {
+  font-size: 11px;
+  color: var(--primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: inherit;
+}
+
+.notif-dropdown__list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.notif-dropdown__empty {
+  padding: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.notif-dropdown__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.notif-dropdown__item--unread {
+  background: var(--primary-light);
+}
+
+.notif-dropdown__msg {
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.notif-dropdown__time {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* --- Role Badge --- */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: 6px;
+}
+
+.role-badge--admin {
+  background: linear-gradient(135deg, #E8EAF6, #C5CAE9);
+  color: #283593;
+}
+
+.role-badge--repairman {
+  background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+  color: #E65100;
+}
+
+.role-badge--user {
+  background: var(--bg);
+  color: var(--text-muted);
+}
+
+/* --- Role Select (Admin Panel) --- */
+.role-select {
+  font-family: inherit;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
 /* --- Media Queries (tablet+ centering) --- */
 @media (min-width: 520px) {
   #app {
     border-left: 1px solid var(--border-light);
     border-right: 1px solid var(--border-light);
+  }
+
+  .notif-dropdown {
+    right: calc(50% - 230px);
   }
 }
