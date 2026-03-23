@@ -222,10 +222,17 @@ function renderHome() {
           ${reports.map((report) => renderReportCard(report)).join('')}`
       }
     </div>
-    <button class="fab" id="btn-create">
-      <span class="material-icons-round">add_a_photo</span>
-      ${t('reportBtn')}
-    </button>
+    ${currentAuthUser ? `
+      <button class="fab" id="btn-create">
+        <span class="material-icons-round">add_a_photo</span>
+        ${t('reportBtn')}
+      </button>
+    ` : `
+      <button class="fab" id="btn-create-login" style="background:var(--text-primary);color:var(--bg)">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:18px;height:18px;background:white;border-radius:50%;padding:2px" alt="G" />
+        İhbar Etmek İçin Giriş Yap
+      </button>
+    `}
     <footer class="app-footer">
       <span>${t('appVersion')}</span>
       <span class="app-footer__dot">·</span>
@@ -234,7 +241,20 @@ function renderHome() {
   `;
   bindNavBar();
   bindHeaderActions();
-  document.getElementById('btn-create').onclick = () => { currentView = 'create'; render(); };
+  
+  if (currentAuthUser) {
+    document.getElementById('btn-create').onclick = () => { currentView = 'create'; render(); };
+  } else {
+    document.getElementById('btn-create-login').onclick = async () => {
+      try { 
+        await signInWithGoogle(); 
+        showToast(t('loginSuccess'), 'success'); 
+        currentView = 'create';
+        render();
+      } catch (err) { showToast(err.message, 'error'); }
+    };
+  }
+
   document.querySelectorAll('.report-card').forEach((card) => {
     card.onclick = (e) => {
       if (e.target.closest('.upvote-btn')) return;

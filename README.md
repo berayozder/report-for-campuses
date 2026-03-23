@@ -39,15 +39,19 @@ Open **http://localhost:5173/** in your browser. That's it! 🎉
 
 | Feature | Description |
 |---------|-------------|
+| 📱 **PWA (Installable)** | Can be installed to home screen with offline fallback support |
+| 🌍 **Multilingual (TR/EN)** | Full Turkish and English support with `localStorage` persistence |
+| 🔍 **Smart Duplicate Detection** | Finds and shows nearby reports within 500m using Haversine formula |
+| ♿ **Accessibility Category** | Dedicated category for accessibility barriers (broken ramps, elevators) |
+| 👥 **Role-Based Access** | Admin (manage users), Repairman (my assignments), User (report constraints) |
+| 🏆 **Gamification** | Points system, earned badges, and public Leaderboard for top reporters |
+| 🏅 **Hall of Fame** | Dedicated view for resolved hazards to build community trust |
+| 📈 **Upvoting System** | "Me Too" button to escalate high-priority campus hazards |
 | 📸 **Photo Capture** | Take a photo with your camera or pick from gallery |
-| 📝 **Description** | Add detailed notes about the hazard |
 | 📍 **Auto Location** | GPS detection + reverse geocoding to readable address |
-| 🏷️ **Hazard Categories** | Broken Outlet, Cracked Glass, Slippery Floor, Lighting, Structural Damage, Fire Risk, Water Leak, Other |
-| 🔐 **Google Sign-In** | Firebase Authentication (optional) |
+| 🔐 **Google Sign-In** | Firebase Authentication |
 | ☁️ **Cloud Storage** | Firestore + Firebase Storage for persistence |
-| 🔄 **Real-time Sync** | Instant updates across all devices |
-| 👨‍💼 **Admin Panel** | Dashboard with stats, status updates, and report deletion |
-| 💾 **Offline Fallback** | Works with localStorage when Firebase is not configured |
+| 👨‍💼 **Admin Panel** | Dashboard with stats, status updates, report assignment, and deletion |
 
 ---
 
