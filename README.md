@@ -1,140 +1,62 @@
-# 🚨 Campus Hazard Reporting System
+# 🚨 Campus Hazard Reporting System (YGA)
 
-> **Kampüs Tehlike İhbar Sistemi** — A web application that lets students quickly report hazards they spot on campus (broken outlets, cracked glass, slippery floors, etc.) by snapping a photo and sharing their location.
+> A web application that lets students quickly report hazards they spot on campus (broken outlets, cracked glass, slippery floors, etc.) by snapping a photo and sharing their location.
 
-### 🌐 [Live Demo → app-yga.vercel.app](https://app-yga.vercel.app)
-
-| Home Screen | Report Form |
-|:-----------:|:-----------:|
-| ![Home](screenshots/home.png) | ![Create Report](screenshots/create-report.png) |
+🌐 **Live Demo:** [app-yga.vercel.app](https://app-yga.vercel.app)
 
 ---
 
+## 🎓 Evaluator Guide (Testing Roles)
 
-## ⚡ Quick Start
+To make grading simple and frictionless, a **"Demo Mode"** is built directly into the live app:
+
+1. **Log in** to the live demo using any Google account.
+2. In the top right corner (next to notifications), look for the special Grader Demo button: **<span class="material-icons-round" style="font-size:16px;vertical-align:middle;">build_circle</span>**.
+3. **Click it** to instantly escalate your privileges to **Admin** for your current session.
+4. You will immediately see the Admin Panel icon appear, and the "My Assignments" tab will become available, allowing you to fully test role-based features without waiting for database approval!
+
+---
+
+## 🎯 Core Functionalities
+
+- 📸 **Photo Reporting:** Take a photo of the hazard or upload from your gallery.
+- 📍 **Auto Location:** Uses GPS to pinpoint the hazard and auto-fills the reading address.
+- 👥 **Role-Based Access:** 
+  - **Users:** Create reports, view the Leaderboard, and upvote hazards.
+  - **Repairmen:** Have a dedicated "My Assignments" tab to manage tasks assigned to them.
+  - **Admins:** Access the Admin Dashboard to manage users, assign repairmen, and update/delete reports.
+- 🔐 **Authentication:** Secure Google Sign-In.
+
+---
+
+## ⚡ Quick Start (Local Development)
 
 ```bash
-# 1. Clone the repo
 git clone https://github.com/berayozder/report-for-campuses.git
 cd report-for-campuses
-
-# 2. Install dependencies
 npm install
-
-# 3. (Optional) Set up Firebase — copy and fill in your Firebase config
-cp .env.example .env
-# Edit .env with your Firebase project values
-
-# 4. Start the development server
 npm run dev
 ```
-
-Open **http://localhost:5173/** in your browser. That's it! 🎉
-
-> **Note:** The app works immediately **without** setting up Firebase — it uses localStorage as a fallback. To enable cloud features (real-time sync, Google sign-in, photo storage), set up the `.env` file with your Firebase project config.
+*(Note: The app works out-of-the-box using `localStorage` as a database fallback if you don't connect Firebase).*
 
 ---
 
-## 🎯 Features
+## ⭐ Additional Features (Added Later to Improve the App)
 
-| Feature | Description |
-|---------|-------------|
-| 📱 **PWA (Installable)** | Can be installed to home screen with offline fallback support |
-| 🌍 **Multilingual (TR/EN)** | Full Turkish and English support with `localStorage` persistence |
-| 🔍 **Smart Duplicate Detection** | Finds and shows nearby reports within 500m using Haversine formula |
-| ♿ **Accessibility Category** | Dedicated category for accessibility barriers (broken ramps, elevators) |
-| 👥 **Role-Based Access** | Admin (manage users), Repairman (my assignments), User (report constraints) |
-| 🏆 **Gamification** | Points system, earned badges, and public Leaderboard for top reporters |
-| 🏅 **Hall of Fame** | Dedicated view for resolved hazards to build community trust |
-| 📈 **Upvoting System** | "Me Too" button to escalate high-priority campus hazards |
-| 📸 **Photo Capture** | Take a photo with your camera or pick from gallery |
-| 📍 **Auto Location** | GPS detection + reverse geocoding to readable address |
-| 🔐 **Google Sign-In** | Firebase Authentication |
-| ☁️ **Cloud Storage** | Firestore + Firebase Storage for persistence |
-| 👨‍💼 **Admin Panel** | Dashboard with stats, status updates, report assignment, and deletion |
+These features were added subsequently to significantly improve user experience and application quality:
+
+- 📱 **PWA (Installable):** Can be installed directly to the phone's home screen.
+- 🌍 **Multilingual:** Full Turkish and English language support.
+- 🔍 **Smart Duplicate Detection:** Alerts users if a similar hazard was already reported within 500 meters.
+- 🏆 **Gamification & Leaderboard:** Point system and earned badges for active reporters to encourage participation.
+- 🏅 **Hall of Fame:** A dedicated public view for successfully resolved hazards to build community trust.
+- 📈 **Upvoting System:** "Me Too" button to collaboratively escalate high-priority issues.
+- ♿ **Accessibility Focus:** A dedicated hazard category specifically for accessibility barriers (e.g., broken ramps).
 
 ---
 
 ## 🏗️ Tech Stack
 
-| Technology | Purpose |
-|------------|---------|
-| [Vite](https://vitejs.dev/) | Dev server & build tool |
-| Vanilla JavaScript | Application logic (no framework) |
-| [Firebase Firestore](https://firebase.google.com/docs/firestore) | Database |
-| [Firebase Storage](https://firebase.google.com/docs/storage) | Photo storage |
-| [Firebase Auth](https://firebase.google.com/docs/auth) | Google sign-in |
-| [Nominatim API](https://nominatim.org/) | Reverse geocoding (address from GPS) |
-
----
-
-## 📁 Project Structure
-
-```
-├── index.html           # Entry point with SEO meta tags
-├── package.json         # Dependencies & scripts
-├── src/
-│   ├── main.js          # SPA router — 3 views (Home, Create, Admin)
-│   ├── store.js         # Firestore CRUD + localStorage fallback
-│   ├── auth.js          # Google sign-in / sign-out
-│   ├── firebase.js      # Firebase configuration & initialization
-│   ├── location.js      # GPS + Nominatim reverse geocoding
-│   ├── utils.js         # Helpers (date formatting, toasts, dialogs)
-│   └── styles/
-│       └── main.css     # Complete design system (~1000 lines)
-└── screenshots/         # App screenshots for documentation
-```
-
----
-
-## 🔥 Firebase Setup (Optional)
-
-> The app works out-of-the-box with localStorage. Follow these steps only if you want cloud persistence.
-
-1. Go to [Firebase Console](https://console.firebase.google.com/) → Create a new project
-2. Enable **Firestore Database** (start in test mode)
-3. Enable **Storage** (start in test mode)
-4. Go to **Authentication** → Enable **Google sign-in** method
-5. Add a **Web app** and copy the config values
-6. Paste the config into `src/firebase.js`
-
----
-
-## 📦 Build for Production
-
-```bash
-# Build optimized bundle
-npm run build
-
-# Preview the production build locally
-npm run preview
-```
-
-The output is generated in the `dist/` directory.
-
----
-
-## 🔧 How It Works
-
-The app is a **Single Page Application (SPA)** built with vanilla JavaScript and Vite:
-
-- **3 Views**: Home (report list), Create Report (form with camera/GPS), Admin Panel (stats + management)
-- **Dual Storage**: Detects if Firebase is configured — if yes, uses Firestore with real-time listeners; if not, falls back to `localStorage`
-- **Location**: Uses the browser's Geolocation API for GPS coordinates, then calls Nominatim for a human-readable address
-- **Auth**: Optional Google sign-in via Firebase Auth — reports can be submitted without login
----
-
-## 🎓 Evaluator Guide (Testing Roles)
-
-To make grading as frictionless as possible, a **"Demo Mode"** has been added directly to the app's interface:
-
-1. **Log in** to the live demo using any Google account.
-2. In the top right corner (next to notifications), you will see a special Grader Demo button with a tool icon: **<span class="material-icons-round" style="font-size:16px;vertical-align:middle;">build_circle</span>**.
-3. **Click it** to instantly escalate your privileges to **Admin** for your current session.
-4. You will immediately see the Admin Panel icon appear, and the "My Assignments" tab will become available, allowing you to fully test role-based features without waiting for manual database approval!
-
----
-
-## 📄 License
-
-Built for **YGA** — Young Guru Academy
+- **Frontend:** Vite & Vanilla JavaScript (No Framework)
+- **Backend/DB:** Firebase (Firestore Database, Cloud Storage, Authentication)
+- **Location:** Nominatim API (Reverse Geocoding)
