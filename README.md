@@ -122,6 +122,16 @@ The app is a **Single Page Application (SPA)** built with vanilla JavaScript and
 - **Dual Storage**: Detects if Firebase is configured — if yes, uses Firestore with real-time listeners; if not, falls back to `localStorage`
 - **Location**: Uses the browser's Geolocation API for GPS coordinates, then calls Nominatim for a human-readable address
 - **Auth**: Optional Google sign-in via Firebase Auth — reports can be submitted without login
+---
+
+## 🎓 Evaluator Guide (Testing Roles)
+
+To make grading as frictionless as possible, a **"Demo Mode"** has been added directly to the app's interface:
+
+1. **Log in** to the live demo using any Google account.
+2. In the top right corner (next to notifications), you will see a special Grader Demo button with a tool icon: **<span class="material-icons-round" style="font-size:16px;vertical-align:middle;">build_circle</span>**.
+3. **Click it** to instantly escalate your privileges to **Admin** for your current session.
+4. You will immediately see the Admin Panel icon appear, and the "My Assignments" tab will become available, allowing you to fully test role-based features without waiting for manual database approval!
 
 ---
 

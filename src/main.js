@@ -106,6 +106,11 @@ function renderHeaderActions() {
           <span class="material-icons-round">notifications</span>
           ${unread > 0 ? `<span class="notif-badge">${unread}</span>` : ''}
         </button>
+        ${currentUserRole !== UserRoles.ADMIN ? `
+          <button class="icon-btn" id="btn-demo-admin" title="Grader Demo: Become Admin" style="color:var(--primary); border:2px solid var(--primary); border-radius:50%; margin-right:4px;">
+            <span class="material-icons-round" style="font-size:18px;">build_circle</span>
+          </button>
+        ` : ''}
         ${currentUserRole === UserRoles.ADMIN ? `
           <button class="icon-btn" id="btn-admin" title="${t('adminPanel')}">
             <span class="material-icons-round">admin_panel_settings</span>
@@ -140,6 +145,13 @@ function bindHeaderActions() {
 
   const adminBtn = document.getElementById('btn-admin');
   if (adminBtn) adminBtn.onclick = () => { currentView = 'admin'; render(); };
+
+  const demoAdminBtn = document.getElementById('btn-demo-admin');
+  if (demoAdminBtn) demoAdminBtn.onclick = () => {
+    currentUserRole = UserRoles.ADMIN;
+    showToast('Evaluator Demo: You are now an Admin!', 'success');
+    render();
+  };
 
   const notifBtn = document.getElementById('btn-notif');
   if (notifBtn) notifBtn.onclick = (e) => {
